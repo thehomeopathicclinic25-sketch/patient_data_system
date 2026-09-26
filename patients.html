@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<p class="page-title">Patients</p>
+<p class="page-subtitle">Search or filter, then click anyone to open their full record.</p>
+
+<form method="get" class="filter-bar">
+  <div class="field" style="min-width:220px;">
+    <label>Search</label>
+    <input type="text" name="search" value="{{ filters.search }}" placeholder="Name or registration no.">
+  </div>
+  <div class="field">
+    <label>Source</label>
+    <select name="source">
+      <option value="">All</option>
+      {% for s in sources %}
+        <option value="{{ s }}" {% if filters.source == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label>City</label>
+    <input type="text" name="city" value="{{ filters.city }}">
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  {% if filters.search or filters.source or filters.city %}
+    <a class="btn" href="{{ url_for('patients') }}">Clear</a>
+  {% endif %}
+</form>
+
+<div class="card" style="padding:0;">
+  <table>
+    <thead>
+      <tr>
+        <th>Reg. no.</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>City</th>
+        <th>Last visit</th>
+        <th>Next follow-up</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in rows %}
+      <tr>
+        <td><a class="row-link" href="{{ url_for('patient_profile', patient_id=p.id) }}">{{ p.registration_no }}</a></td>
+        <td><a class="row-link" href="{{ url_for('patient_profile', patient_id=p.id) }}">{{ p.name }}</a></td>
+        <td>{{ p.phone_number or "" }}</td>
+        <td>{{ p.city or "" }}</td>
+        <td>{{ p.last_visit_date or "" }}</td>
+        <td>
+          {% if p.next_followup_date %}
+            {{ p.next_followup_date }}
+          {% else %}
+            <span class="badge-muted badge">None</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6"><div class="empty-state">No patients match these filters yet.</div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

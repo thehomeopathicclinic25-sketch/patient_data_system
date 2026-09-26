@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.name }}{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="profile-header">
+    <div>
+      <p class="profile-name">{{ patient.name }} <span style="color:var(--ink-muted); font-weight:400; font-size:14px;">{{ patient.registration_no }}</span></p>
+      <p class="profile-meta">
+        {{ patient.gender or "" }}{% if patient.gender and patient.dob %} &middot; {% endif %}{% if patient.dob %}DOB {{ patient.dob }}{% endif %}
+        {% if patient.city %} &middot; {{ patient.city }}{% if patient.country %}, {{ patient.country }}{% endif %}{% endif %}
+        {% if patient.phone_number %} &middot; {{ patient.phone_number }}{% endif %}
+        {% if patient.source %} &middot; via {{ patient.source }}{% endif %}
+      </p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('add_followup', patient_id=patient.id) }}">+ Add follow-up</a>
+  </div>
+</div>
+
+<p class="section-label">Visit history</p>
+<div class="card" style="padding:0;">
+  <table>
+    <thead>
+      <tr>
+        <th>Visit date</th>
+        <th>Type</th>
+        <th>Mode</th>
+        <th>Notes</th>
+        <th>Charges</th>
+        <th>Next follow-up</th>
+        <th>Reminder</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in visits %}
+      <tr>
+        <td>{{ v.visit_date }}</td>
+        <td><span class="badge">{{ v.visit_type }}</span></td>
+        <td>{{ v.consultation_mode or "" }}</td>
+        <td style="max-width:220px;">{{ v.notes or "" }}</td>
+        <td>{{ v.charges or "" }}</td>
+        <td>{{ v.next_followup_date or "" }}</td>
+        <td>
+          {% if v.next_followup_date %}
+            <form method="post" action="{{ url_for('toggle_reminder', visit_id=v.id) }}">
+              <button type="submit" class="btn btn-sm {{ 'btn-success' if v.reminder_enabled else 'btn-danger' }}">
+                {{ "On" if v.reminder_enabled else "Off" }}
+              </button>
+            </form>
+          {% else %}
+            <span class="badge-muted badge">&mdash;</span>
+          {% endif %}
+        </td>
+        <td><a class="btn btn-sm" href="{{ url_for('edit_visit', visit_id=v.id) }}">Edit</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8"><div class="empty-state">No visits recorded yet.</div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Export data{% endblock %}
+{% block content %}
+<p class="page-title">Export data</p>
+<p class="page-subtitle">Filter visits below, then download exactly that slice as Excel for analysis.</p>
+
+<form method="get" class="card">
+  <div class="field-grid">
+    <div><label>Search (name / reg. no.)</label><input type="text" name="search" value="{{ filters.search }}"></div>
+    <div>
+      <label>Visit type</label>
+      <select name="visit_type">
+        <option value="">All</option>
+        {% for v in visit_types %}<option value="{{ v }}" {% if filters.visit_type == v %}selected{% endif %}>{{ v }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Consultation mode</label>
+      <select name="consultation_mode">
+        <option value="">All</option>
+        {% for c in consultation_modes %}<option value="{{ c }}" {% if filters.consultation_mode == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Source</label>
+      <select name="source">
+        <option value="">All</option>
+        {% for s in sources %}<option value="{{ s }}" {% if filters.source == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Payment mode</label>
+      <select name="payment_mode">
+        <option value="">All</option>
+        {% for p in payment_modes %}<option value="{{ p }}" {% if filters.payment_mode == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
+      </select>
+    </div>
+    <div><label>From</label><input type="date" name="date_from" value="{{ filters.date_from }}"></div>
+    <div><label>To</label><input type="date" name="date_to" value="{{ filters.date_to }}"></div>
+  </div>
+  <div style="margin-top:20px; display:flex; gap:10px;">
+    <button class="btn btn-primary" type="submit">Preview</button>
+    <a class="btn btn-success" href="{{ url_for('export_download', **filters) }}">Download as Excel</a>
+  </div>
+</form>
+
+<p class="section-label">{{ rows|length }} matching visit(s) shown below (preview capped at 100 rows; download includes all matches)</p>
+<div class="card" style="padding:0;">
+  <table>
+    <thead>
+      <tr>
+        <th>Reg. no.</th><th>Name</th><th>Visit date</th><th>Type</th><th>Mode</th><th>Source</th><th>Charges</th><th>Payment</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.registration_no }}</td>
+        <td>{{ r.name }}</td>
+        <td>{{ r.visit_date }}</td>
+        <td>{{ r.visit_type }}</td>
+        <td>{{ r.consultation_mode or "" }}</td>
+        <td>{{ r.source or "" }}</td>
+        <td>{{ r.charges or "" }}</td>
+        <td>{{ r.payment_mode or "" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8"><div class="empty-state">No visits match these filters.</div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
